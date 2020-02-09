@@ -122,8 +122,10 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
 	          continue;
 	       }
         byte data;
-        printf("Auth Successful Block: %x, key: %x\n",blockAddr_e, *defaultKeys[ikey]);
+        printf("Auth Successful Block: %d, key: %x\n",blockAddr_e, *defaultKeys[ikey]);
         fflush(stdout);
+        resetPICC( delayTime );
+        initCom();
         if(readBlock( blockAddr_e,  &data, 32))
         {
             std::cout << "Read Block successfully\n";
