@@ -20,6 +20,7 @@ Section:                                          ~libs
 #include "crapto1.h"
 #include "rfid_com_constants.h"
 #include "RC522.h"
+#include <string.h>
 
 #include <cstdint>
 #include <vector>
