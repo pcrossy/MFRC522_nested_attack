@@ -107,7 +107,7 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
     for( int ikey = 0; ikey < nDefaultKeys; ikey++ )
     {
          std::cout << "Trying default key: \n" << defaultKeys[ikey];
-         key = defaultKeys[ikey]
+         key = defaultKeys[ikey];
         /*-------------------------------------- get nonce distance  ---------------------------------------*/
 	    if( !authenticateManually( command, blockAddr_e, &n_T, key ) )  // ( byte command, byte blockAddr, uint32_t *n_T, byte *key /*=nullptr*/ )
 	       {
@@ -120,7 +120,7 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
 	          std::cerr << "Error: could not find nonce distance\n";
 	          break;
 	       }
-        byte data[64];
+        byte *data;
         if(readBlock( blockAddr_e,  &data, 32))
         {
             std::cout << "Read Block successfully\n";
