@@ -58,9 +58,9 @@ RC522::RC522()
     }
 
 
-    
+
 #if RC522_WIRE
-    
+
     wiringPiSetup();
 
     wiringPiSPISetup( CHANNEL, SPI_SPEED );
@@ -87,7 +87,7 @@ RETURN:
 void RC522::resetPCD()
 {
 #if RC522_WIRE
-    
+
     pinMode( RST, INPUT );
 
     if (digitalRead(RST) == LOW)
@@ -95,7 +95,7 @@ void RC522::resetPCD()
 	#if RC522_DBG
 	std::cout << "hard reset\n";
 	#endif
-	
+
 	pinMode( RST, OUTPUT );
 	digitalWrite(RST, HIGH);		// Exit power down mode. This triggers a hard reset.
 
@@ -115,17 +115,17 @@ void RC522::resetPCD()
 	delay(50);
 
 	byte cmdStatus;
-	
+
 	// wait until power down bit is cleared
 	do
 	{
 	    readRegister( CMD_REG, &cmdStatus );
 	}while( cmdStatus & (1<<4) );
     }// end hard/soft reset
-    
+
 #endif// wire
 }// resetPCD
-    
+
 
 /*=============================================================================================================
 
@@ -138,7 +138,7 @@ RETURN:
 
 void RC522::setupPCD()
 {
-        
+
 // When communicating with a PICC we need a timeout if something goes wrong.
 // f_timer = 13.56 MHz / (2*TPreScaler+1) where TPreScaler = [TPrescaler_Hi:TPrescaler_Lo].
 // TPrescaler_Hi are the four low bits in TModeReg. TPrescaler_Lo is TPrescalerReg.
@@ -155,7 +155,7 @@ void RC522::setupPCD()
     // transmit only in RF field, polarity active HIGH on MFIN pin, CRC preset 0x6363
     m_val = 0x3D;
     writeRegister(MODE_REG, &m_val );			// Default 0x3F. Set the preset value for the CRC coprocessor for the CalcCRC command to 0x6363 (ISO 14443-3 part 6.2.4)
-    
+
 }
 
 /*#############################################################################################################
@@ -193,14 +193,14 @@ ARGUMENT(S):
 DESCRIPTION: transmits anticollision and receives uid
 RETURN:
 
-==============================================================================================================*/    
+==============================================================================================================*/
 
 bool RC522::anticollision()
 {
 #if RC522_DBG
     std::cout << "anticollision\n";
 #endif
-    
+
     byte pack[5];// to receive 4 byte uid + bcc
     pack[0] = MSB(ANTICOLLISION);
     pack[1]  = LSB(ANTICOLLISION);
@@ -221,14 +221,14 @@ ARGUMENT(S):
 DESCRIPTION: selects TAG with uid to set up communication
 RETURN:
 
-==============================================================================================================*/    
+==============================================================================================================*/
 
 bool RC522::select()
 {
 #if RC522_DBG
     std::cout << "select\n";
 #endif
-    
+
     byte pack[9];// select(1), nvb(1), uid(4), bcc(1), crc(2)
     pack[0] = MSB(SELECT);
     pack[1] = LSB(SELECT);
@@ -259,13 +259,13 @@ RETURN:
 
 void RC522::initCom()
 {
-   
+
     while( 1 )
     {
 	#if RC522_WIRE
 	delay(10);
 	#endif
-	
+
 	if( !sendReqA() ) continue;
 
 	if( !anticollision() ) continue;
@@ -299,7 +299,7 @@ bool RC522::authenticateOnChip( byte command, byte blockAddr, byte *key /*=nullp
 #if RC522_DBG
     std::cout << "authenticate\n";
 #endif
-    
+
     byte pack[12];// command(1), block(1), key(6), uid(4)
 
     pack[0] = command;
@@ -366,7 +366,7 @@ bool RC522::readBlock( byte blockAddr, byte *data, byte len )
 #if RC522_DBG
     std::cout << "readBlock\n";
 #endif
-    
+
     if( len < 18 )
     {
 	std::cerr << "Could not read: No storage\n";
@@ -398,7 +398,7 @@ bool RC522::readBlock( byte blockAddr, byte *data, byte len )
 
 /*=============================================================================================================
 
-NAME:                                             ~getUID
+NAME:                                             ~get>
 ARGUMENT(S):
 DESCRIPTION: getter
 RETURN:
@@ -472,7 +472,7 @@ bool RC522::halt()
 #if RC522_DBG
     std::cout << "halt\n";
 #endif
-    
+
     byte pack[4];// command(1), 0x00, CRC(2)
 
     pack[0] = HALT;
@@ -518,7 +518,7 @@ DESCRIPTION: helper to halt, then stop crypto
 RETURN:
 
 ==============================================================================================================*/
-    
+
 void RC522::stop()
 {
     while( !halt() );
@@ -544,7 +544,7 @@ RETURN:
 
 void RC522::writeRegister( byte reg, byte *val, const byte len /*=1*/ )
 {
-    
+
     byte data[ len + 1];// addr + val
     // select register
     data[0] = ( reg & 0x7E ); // section 8.1.2.3: MSB=0 -> writing register, LSB=0
@@ -553,7 +553,7 @@ void RC522::writeRegister( byte reg, byte *val, const byte len /*=1*/ )
     {
 	data[i+1] = val[i];
     }
-    
+
 #if RC522_DBG
     std::cout << "Wrote register " << std::hex << (int)( reg>>1 )
 	      << ": ";
@@ -563,11 +563,11 @@ void RC522::writeRegister( byte reg, byte *val, const byte len /*=1*/ )
     }
     std::cout << std::dec << std::endl;
 #endif
-    
-#if RC522_WIRE    
+
+#if RC522_WIRE
     wiringPiSPIDataRW(CHANNEL, data, len+1 );
 #endif
-    
+
 }
 
 /*=============================================================================================================
@@ -580,14 +580,14 @@ RETURN:
 ==============================================================================================================*/
 
 void RC522::readRegister( byte reg, byte *buffer, byte nrOfBytes /*= 1*/ )
-{ 
+{
     // select register
     buffer[0] = (0x80 | (reg & 0x7E));// section 8.1.2.3: MSB=1 -> reading, LSB=0
 
 #if RC522_WIRE
     wiringPiSPIDataRW(CHANNEL, buffer, 1 );// 1st byte back is trash
 #endif
-    
+
     for( int i = 0; i<nrOfBytes-1; i++ )// if more than 1 byte is to be read
     {
 	buffer[i] = (0x80 | (reg & 0x7E));// section 8.1.2.3: MSB=1 -> reading, LSB=0
@@ -608,13 +608,13 @@ void RC522::readRegister( byte reg, byte *buffer, byte nrOfBytes /*= 1*/ )
     }
     std::cout << std::dec << std::endl;
 #endif
-    
+
 }
 
 /*=============================================================================================================
 
 NAME:                                             ~piccIO
-ARGUMENT(S): command to pcd, nr of bytes to send, buffer with data to send but also receive to, length of buffer, optional nr of bits sent in the last byte (man parity will need this) 
+ARGUMENT(S): command to pcd, nr of bytes to send, buffer with data to send but also receive to, length of buffer, optional nr of bits sent in the last byte (man parity will need this)
 DESCRIPTION: sends a command and belonging data, receives to the same buffer overwriting the old info
 RETURN:
 
@@ -622,7 +622,7 @@ RETURN:
 
 bool RC522::piccIO( byte command, byte nrOfBytesToSend, byte *data, byte len, byte nrOfLastBits /*=0*/ )
 {
-    
+
 #if RC522_DBG
     std::cout << "piccIO\n";
 #endif
@@ -634,11 +634,11 @@ bool RC522::piccIO( byte command, byte nrOfBytesToSend, byte *data, byte len, by
     m_val = 0x80;
     writeRegister( FIFO_LVL_REG, &m_val );// flush FIFO buffer
     writeRegister( FIFO_DATA_REG, data, nrOfBytesToSend );// send data to FIFO
-    m_val = nrOfLastBits;// set the nr of bits to send of the last byte ( REQ_A uses 7, man parity varies 
+    m_val = nrOfLastBits;// set the nr of bits to send of the last byte ( REQ_A uses 7, man parity varies
     writeRegister( BIT_FRAMING_REG, &m_val );
-    
+
     writeRegister( CMD_REG, &command );// ex. tranceive
-    
+
 
     byte finishFlag = 0x10;// default command finished (idle)
 
@@ -646,7 +646,7 @@ bool RC522::piccIO( byte command, byte nrOfBytesToSend, byte *data, byte len, by
     {
 	finishFlag = 0x30;// finished command (idle) or received the end of a datapacket
     }
-    
+
     if( command == TRANSCEIVE )// set bit 7 of bitframing_reg to start send when transceiving
     {
 	finishFlag = 0x30;// finished command (idle) or received the end of a datapacket
@@ -686,7 +686,7 @@ bool RC522::piccIO( byte command, byte nrOfBytesToSend, byte *data, byte len, by
 	std::cerr << "Error occured\n";
 	return false;
     }
-    
+
     /*-------------------------------------- receiving  ---------------------------------------*/
     if( command == TRANSCEIVE || command == RECEIVE )
     {
@@ -699,9 +699,9 @@ bool RC522::piccIO( byte command, byte nrOfBytesToSend, byte *data, byte len, by
 	}
 
 	readRegister( FIFO_DATA_REG, data, status );
-	
+
     }// if receive
-    
+
     return true;
 
 }// piccIO
