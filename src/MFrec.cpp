@@ -62,6 +62,7 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
     printf("B: %d, K: %d\n", blockAddr_a);
     printf("B: %x, K: %x\n", blockAddr_a);
     printf("UID: %s, UID: %x\n",getUID(),getUID());
+    fflush(stdout);
     crackKey( command,  blockAddr_e, blockAddr_a, key);
     return false;
 }// automatedCrackKey
@@ -85,7 +86,6 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
     allKeys.reserve(2e6);
 
     byte plausibleKey[6];
-;
 
     if( ( pthread_mutex_init( &m_lock, NULL ) ) != 0 )
     {
@@ -99,7 +99,7 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
     resetPICC( delayTime );
     initCom();
     printf("UID after initCom and reset: %x",getUID());
-
+    fflush(stdout);
     /*-------------------------------------- RECOVERY LOOP  ---------------------------------------*/
     for( int probe = 0; probe < PROBE_NR; probe++ )
     {
