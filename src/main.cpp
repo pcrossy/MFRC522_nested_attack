@@ -7,14 +7,20 @@
 **************************************************************************************************************/
 
 #include "MFrec.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-int main()
+int main(int argc, char* argv[])
 {
  
     MFrec com;
 	
     //  (command, exploit addr (block with known key), attack addr (key to recover), opt key for exploit bloc)
-    com.crackKey( AUTHENT_A, 63, 6 );
+    byte key = (atoi(argv[2]) & 0xFF);
+    byte block = (atoi(argv[1]) & 0xFF);
+    printf("B: %d, K: %d\n", block,key);
+    printf("B: %x, K: %x\n", block,key);
+    com.crackKey( AUTHENT_A, block, key );
 
     com.stop();
     

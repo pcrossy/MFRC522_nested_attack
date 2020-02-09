@@ -164,7 +164,8 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 
 		if( index >9 ) index = 0;// rolling buffer
 		duplicateKeys[index++] = allKeys[i-1];// store the 10 most frequent keys, most frequent last
-	    }
+	        std::cout << "Most frequent cand: " << allKeys[i-1] << std::endl;
+		}
 	    counter = 0;
 	}
 	
@@ -197,7 +198,7 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 		plausibleKey[i] = (byte)pk;
 		pk >>= 8;
 	    }
-
+            std::cout << "Trying: " << std::hex << pkStore << std::dec << std::endl;
 	    #if RC522_DBG
 	    std::cout << "Trying: " << std::hex << pkStore << std::dec << std::endl;
 	    #endif
