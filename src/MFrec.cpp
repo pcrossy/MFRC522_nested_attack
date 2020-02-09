@@ -114,21 +114,26 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
 	          std::cerr << "Not the right key? Could not authenticate\n";
 	          continue;
 	       }
-
+        else{
+            key = defaultKeys[ikey];
+            printf("Auth Successful Block: %d, key: %x\n",blockAddr_e, *defaultKeys[ikey]);
+            fflush(stdout);
+            break;
+        }
 	    if( nonceDistance( &n_T ) == 0 )
 	       {
 	          std::cerr << "Error: could not find nonce distance\n";
 	          continue;
 	       }
-        byte data;
-        printf("Auth Successful Block: %d, key: %x\n",blockAddr_e, *defaultKeys[ikey]);
+    }
+    byte data;
+    printf("Try read data\n");
+    fflush(stdout);
+    if(readBlock( blockAddr_e,  &data, 1))
+    {
+        std::cout << "Read Block successfully\n";
+        printf("Read Block: %x with key: %x, data: %x\n",blockAddr_e, defaultKeys[ikey], data);
         fflush(stdout);
-        resetPICC( delayTime );
-        if(readBlock( blockAddr_e,  &data, 1))
-        {
-            std::cout << "Read Block successfully\n";
-            printf("Read Block: %x with key: %x, data: %x\n",blockAddr_e, defaultKeys[ikey], data);
-        }
     }
 	// resetPICC( delayTime ); // Resets for new auths!
 
