@@ -61,6 +61,7 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
 {
     printf("B: %d, K: %d\n", blockAddr_a);
     printf("B: %x, K: %x\n", blockAddr_a);
+    printf("UID: %s, UID: %x\n",getUID(),getUID());
     crackKey( command,  blockAddr_e, blockAddr_a, key);
     return false;
 }// automatedCrackKey
