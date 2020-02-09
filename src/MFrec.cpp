@@ -108,7 +108,7 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
     {
         resetPICC( delayTime );
         byte *fullkey[6] = {0,0,0,0,0,0};
-        fullkey = defaultKeys[ikey];
+        &fullkey = defaultKeys[ikey];
         printf("Trying default key: %x\n", *fullkey);
         /*-------------------------------------- get nonce distance  ---------------------------------------*/
 	    if( !authenticateManually( command, blockAddr_e, &n_T, defaultKeys[ikey] ) )  // ( byte command, byte blockAddr, uint32_t *n_T, byte *key /*=nullptr*/ )
