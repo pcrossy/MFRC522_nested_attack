@@ -132,7 +132,7 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
     if(readBlock( blockAddr_e,  &data, 1))
     {
         std::cout << "Read Block successfully\n";
-        printf("Read Block: %x with key: %x, data: %x\n",blockAddr_e, defaultKeys[ikey], data);
+        printf("Read Block: %x with key: %x, data: %x\n",blockAddr_e, key, data);
         fflush(stdout);
     }
 	// resetPICC( delayTime ); // Resets for new auths!
