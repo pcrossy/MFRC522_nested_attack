@@ -107,14 +107,14 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
     for( int ikey = 0; ikey < nDefaultKeys; ikey++ )
     {
         resetPICC( delayTime );
-        printf("Trying default key: %x\n", *defaultKeys[ikey]);
+        byte *fullkey[6] = defaultKeys[ikey];
+        printf("Trying default key: %x\n", *fullkey);
         /*-------------------------------------- get nonce distance  ---------------------------------------*/
 	    if( !authenticateManually( command, blockAddr_e, &n_T, defaultKeys[ikey] ) )  // ( byte command, byte blockAddr, uint32_t *n_T, byte *key /*=nullptr*/ )
 	       {
 	          std::cerr << "Not the right key? Could not authenticate\n";
 	          continue;
-	       }
-        else{
+	       }else{
             key = defaultKeys[ikey];
             printf("Auth Successful Block: %d, key: %x\n",blockAddr_e, *defaultKeys[ikey]);
             fflush(stdout);
