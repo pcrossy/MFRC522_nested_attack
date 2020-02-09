@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
     byte block = (atoi(argv[1]) & 0xFF);
     printf("B: %d, K: %d\n", block,key);
     printf("B: %x, K: %x\n", block,key);
-    com.crackKey( AUTHENT_A, block, key );
+    com.automatedCrackKey( AUTHENT_A, block, key );
 
     com.stop();
 
