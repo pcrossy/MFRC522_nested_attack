@@ -12,9 +12,9 @@
 
 int main(int argc, char* argv[])
 {
- 
+
     MFrec com;
-	
+
     //  (command, exploit addr (block with known key), attack addr (key to recover), opt key for exploit bloc)
     byte key = (atoi(argv[2]) & 0xFF);
     byte block = (atoi(argv[1]) & 0xFF);
@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     com.crackKey( AUTHENT_A, block, key );
 
     com.stop();
-    
+
     return 0;
 
 }

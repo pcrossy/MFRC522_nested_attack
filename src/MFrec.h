@@ -62,7 +62,7 @@ struct Authentication
 
 };
 
-// store known info between functions 
+// store known info between functions
 struct AuthInfo
 {
     uint32_t distances[DIST_NR];
@@ -84,7 +84,7 @@ public:
     ~MFrec();
 
     /*-------------------------------------- key recovery  ---------------------------------------*/
-
+    bool automatedCrackKey(byte command, byte blockAddr_e, byte blockAddr_a, byte *key = nullptr);
     bool crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *key = nullptr );
 
 protected:
@@ -98,9 +98,9 @@ private:
     void resetPICC( int waitTime );
 
     /*-------------------------------------- frame manipulators  ---------------------------------------*/
-    byte makeRawFrame( byte *data, byte dataLen, byte *parityBits, byte *packet ); 
+    byte makeRawFrame( byte *data, byte dataLen, byte *parityBits, byte *packet );
     void extractData( byte *packet, byte len, byte *parityBits, byte *data );
-    
+
 
     /*-------------------------------------- crypto  ---------------------------------------*/
     uint32_t nonceDistance( uint32_t *n_T );// done once after manual authentication with known key
@@ -113,17 +113,17 @@ private:
     struct Authentication *m_auth;
     struct AuthInfo *m_authInfo;
 
-    
+
 
     /*-------------------------------------- threading specifics  ---------------------------------------*/
     pthread_t t_id[ SETS_NR ];
     int id_index = 0;
     std::vector<std::vector<uint64_t>>possibleKeys;// each thread will have its own vector
-    
+
     byte t_cmd, t_blockAddr;// bodge way to pass arguments to threaded function
     byte knownBlock;
 
-    
+
     pthread_mutex_t m_lock;// ensure only 1 thread access piccIO and shared member variables at a time
     void t_recoverKey( );// use thread as non-static member function
 
@@ -134,7 +134,7 @@ private:
     }
 
 
-	
+
 };
 
 #endif// header guard
