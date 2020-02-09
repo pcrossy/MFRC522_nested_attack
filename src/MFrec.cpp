@@ -106,12 +106,15 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
 
     for( int ikey = 0; ikey < nDefaultKeys; ikey++ )
     {
-        printf("Trying default key: %x\n", defaultKeys[ikey]);
+        resetPICC( delayTime );
+        initCom();
+        printf("Trying default key: %x\n", *defaultKeys[ikey]);
         key = defaultKeys[ikey];
         /*-------------------------------------- get nonce distance  ---------------------------------------*/
 	    if( !authenticateManually( command, blockAddr_e, &n_T, key ) )  // ( byte command, byte blockAddr, uint32_t *n_T, byte *key /*=nullptr*/ )
 	       {
 	          std::cerr << "Not the right key? Could not authenticate\n";
+              resetPICC( delayTime );
 	          continue;
 	       }
 
@@ -126,6 +129,7 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
             std::cout << "Read Block successfully\n";
             printf("Read Block: %x with key: %x, data: %x\n",blockAddr_e, key, data);
         }
+        resetPICC( delayTime );
     }
 	// resetPICC( delayTime ); // Resets for new auths!
 
