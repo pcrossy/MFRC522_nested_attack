@@ -59,11 +59,77 @@ RETURN:
 ==============================================================================================================*/
 bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *key /*= nullptr*/ )
 {
-    printf("B: %d, K: %d\n", blockAddr_a);
-    printf("B: %x, K: %x\n", blockAddr_a);
+    // Array with default Mifare Classic keys
+    uint8_t defaultKeys[][6] = {
+        {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}, // Default key (first key used by program if no user defined key)
+        {0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5}, // NFCForum MAD key
+        {0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7}, // NFCForum content key
+        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // Blank key
+        {0xb0, 0xb1, 0xb2, 0xb3, 0xb4, 0xb5},
+        {0x4d, 0x3a, 0x99, 0xc3, 0x51, 0xdd},
+        {0x1a, 0x98, 0x2c, 0x7e, 0x45, 0x9a},
+        {0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff},
+        {0x71, 0x4c, 0x5c, 0x88, 0x6e, 0x97},
+        {0x58, 0x7e, 0xe5, 0xf9, 0x35, 0x0f},
+        {0xa0, 0x47, 0x8c, 0xc3, 0x90, 0x91},
+        {0x53, 0x3c, 0xb6, 0xc7, 0x23, 0xf6},
+        {0x8f, 0xd0, 0xa4, 0xf2, 0x56, 0xe9}};
+    size_t nDefaultKeys = sizeof(defaultKeys)/sizeof(defaultKeys[0]);
+    size_t nBlocksPerSector = 4;
+    size_t nByTesPerBlock = 32;
+    size_t nSectors = 16;
+    printf("B: %d, K: %d, Size of defaultKeys: %d\n", blockAddr_a,blockAddr_a,nDefaultKeys);
+    printf("B: %x, K: %x\n", blockAddr_a,blockAddr_a);
     printf("UID: %s, UID: %x\n",getUID(),getUID());
     fflush(stdout);
-    crackKey( command,  blockAddr_e, blockAddr_a, key);
+
+    uint32_t n_T;
+
+    uint64_t duplicateKeys[10]={0};
+    std::vector<uint64_t>allKeys;
+    allKeys.reserve(2e6);
+
+    byte plausibleKey[6];
+
+    // ensure only 1 thread access piccIO and shared member variables at a time
+    if( ( pthread_mutex_init( &m_lock, NULL ) ) != 0 )
+    {
+    std::cerr << "Error initializing mutex\n";
+    return false;
+    }
+
+    const int delayTime = 10;
+    resetPICC( delayTime );
+    initCom();
+    printf("UID after initCom and reset: %x \n",getUID());
+    fflush(stdout);
+
+    for( int ikey = 0; ikey < nDefaultKeys; ikey++ )
+    {
+         std::cout << "Trying default key: \n" << defaultKeys[ikey];
+         key = defaultKeys[ikey]
+        /*-------------------------------------- get nonce distance  ---------------------------------------*/
+	    if( !authenticateManually( command, blockAddr_e, &n_T, key ) )  // ( byte command, byte blockAddr, uint32_t *n_T, byte *key /*=nullptr*/ )
+	       {
+	          std::cerr << "Not the right key? Could not authenticate\n";
+	          break;
+	       }
+
+	    if( nonceDistance( &n_T ) == 0 )
+	       {
+	          std::cerr << "Error: could not find nonce distance\n";
+	          break;
+	       }
+        byte data;
+        if(readBlock( blockAddr_e, byte *data, byte len ))
+        {
+            std::cout << "Read Block successfully\n";
+            printf("Read Block: %x with key: %x, data: %x\n",blockAddr_e, key, data);
+        }
+    }
+	// resetPICC( delayTime ); // Resets for new auths!
+
+    // crackKey( command,  blockAddr_e, blockAddr_a, key);
     return false;
 }// automatedCrackKey
 
@@ -98,8 +164,6 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 
     resetPICC( delayTime );
     initCom();
-    printf("UID after initCom and reset: %x",getUID());
-    fflush(stdout);
     /*-------------------------------------- RECOVERY LOOP  ---------------------------------------*/
     for( int probe = 0; probe < PROBE_NR; probe++ )
     {
