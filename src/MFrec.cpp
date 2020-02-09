@@ -98,7 +98,7 @@ bool MFrec::crackKey( byte command, byte blockAddr_e, byte blockAddr_a, byte *ke
 
     resetPICC( delayTime );
     initCom();
-    // printf("UID after initCom and reset: %s %x",getUID(),getUID());
+    printf("UID after initCom and reset: %x",getUID());
 
     /*-------------------------------------- RECOVERY LOOP  ---------------------------------------*/
     for( int probe = 0; probe < PROBE_NR; probe++ )
