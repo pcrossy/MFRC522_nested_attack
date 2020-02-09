@@ -120,7 +120,7 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
 	          std::cerr << "Error: could not find nonce distance\n";
 	          break;
 	       }
-        byte *data;
+        byte data;
         if(readBlock( blockAddr_e,  &data, 32))
         {
             std::cout << "Read Block successfully\n";
