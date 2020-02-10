@@ -107,9 +107,6 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
     for( int ikey = 0; ikey < nDefaultKeys; ikey++ )
     {
         resetPICC( delayTime );
-        uint8_t *fullkey[6] = {0,0,0,0,0,0};
-        fullkey = &defaultKeys[ikey];
-        printf("Trying default key: %x\n", *fullkey);
         /*-------------------------------------- get nonce distance  ---------------------------------------*/
 	    if( !authenticateManually( command, blockAddr_e, &n_T, defaultKeys[ikey] ) )  // ( byte command, byte blockAddr, uint32_t *n_T, byte *key /*=nullptr*/ )
 	       {
@@ -408,11 +405,14 @@ bool MFrec::authenticateManually( byte command, byte blockAddr, uint32_t *n_T, b
     }
 
     uint64_t sectorKey = bytesToInt( key, 6);
+    printf("%x\nDone with key", sectorKey);
+    fflush(stdout);
 	sectorKey = ((sectorKey << 8) & 0xFF00FF00FF00FF00ULL ) | ((sectorKey >> 8) & 0x00FF00FF00FF00FFULL );
     sectorKey = ((sectorKey << 16) & 0xFFFF0000FFFF0000ULL ) | ((sectorKey >> 16) & 0x0000FFFF0000FFFFULL );
     sectorKey = (sectorKey << 32) | (sectorKey >> 32);
 	sectorKey = sectorKey >>= 16;
-
+    printf("%x\nDone with key", sectorKey);
+    fflush(stdout);
     m_authInfo->key = sectorKey;
 
 #if RC522_DBG
