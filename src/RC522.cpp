@@ -369,7 +369,7 @@ bool RC522::readBlock( byte blockAddr, byte *data, byte len )
 #endif
 
     // if( len < 18 )
-    if( len < 16 )
+    if( len < 18 )
     {
 	std::cerr << "Could not read: No storage\n";
 	return false;
