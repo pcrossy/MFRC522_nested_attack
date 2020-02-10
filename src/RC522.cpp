@@ -664,7 +664,7 @@ bool RC522::piccIO( byte command, byte nrOfBytesToSend, byte *data, byte len, by
 	writeRegister( BIT_FRAMING_REG, &m_val );
     }
 
-    int watchDog = 3000;
+    int watchDog = 6000;
     byte status;
     while(1)// wait for completion
     {
