@@ -405,13 +405,13 @@ bool MFrec::authenticateManually( byte command, byte blockAddr, uint32_t *n_T, b
     }
 
     uint64_t sectorKey = bytesToInt( key, 6);
-    printf("%x\namDone with key", sectorKey);
+    printf("%x\ninit uint64", sectorKey);
     fflush(stdout);
 	sectorKey = ((sectorKey << 8) & 0xFF00FF00FF00FF00ULL ) | ((sectorKey >> 8) & 0x00FF00FF00FF00FFULL );
     sectorKey = ((sectorKey << 16) & 0xFFFF0000FFFF0000ULL ) | ((sectorKey >> 16) & 0x0000FFFF0000FFFFULL );
     sectorKey = (sectorKey << 32) | (sectorKey >> 32);
 	sectorKey = sectorKey >>= 16;
-    printf("%x\namDone with key", sectorKey);
+    printf("%x\nmodded sec jey", sectorKey);
     fflush(stdout);
     m_authInfo->key = sectorKey;
 
