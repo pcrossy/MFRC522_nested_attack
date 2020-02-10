@@ -394,7 +394,8 @@ bool RC522::readBlock( byte blockAddr, byte *data, byte len )
     data[1] = blockAddr;
 
     calcCRC( data, 2, &data[2] );
-
+    printf("Calced CRC executing piccIO");
+    fflush(stdout);
     return piccIO( TRANSCEIVE, 4, data, len );
 }
 
