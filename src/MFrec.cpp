@@ -124,7 +124,7 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
 	          continue;
 	       }
     }
-    byte data;
+    byte data[32];
     printf("Try read data\n");
     fflush(stdout);
     // resetPICC( delayTime );

@@ -670,8 +670,6 @@ bool RC522::piccIO( byte command, byte nrOfBytesToSend, byte *data, byte len, by
     while(1)// wait for completion
     {
 	readRegister( COM_IRQ_REG, &status );
-    printf("%x",status);
-    fflush(stdout);
 	if( status & finishFlag ) break;
 
 	if( status & 0x01 || !(--watchDog) )// chip timer (set in constructor) or safety
