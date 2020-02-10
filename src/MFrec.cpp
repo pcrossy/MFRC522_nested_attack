@@ -127,7 +127,7 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
     byte data;
     printf("Try read data\n");
     fflush(stdout);
-    if(readBlock( blockAddr_e,  &data, 1))
+    if(readBlock( blockAddr_e,  &data, 32))
     {
         std::cout << "Read Block successfully\n";
         printf("Read Block: %x with key: %x, data: %x\n",blockAddr_e, key, data);
@@ -405,13 +405,13 @@ bool MFrec::authenticateManually( byte command, byte blockAddr, uint32_t *n_T, b
     }
 
     uint64_t sectorKey = bytesToInt( key, 6);
-    printf("%x\nDone with key", sectorKey);
+    printf("%x\namDone with key", sectorKey);
     fflush(stdout);
 	sectorKey = ((sectorKey << 8) & 0xFF00FF00FF00FF00ULL ) | ((sectorKey >> 8) & 0x00FF00FF00FF00FFULL );
     sectorKey = ((sectorKey << 16) & 0xFFFF0000FFFF0000ULL ) | ((sectorKey >> 16) & 0x0000FFFF0000FFFFULL );
     sectorKey = (sectorKey << 32) | (sectorKey >> 32);
 	sectorKey = sectorKey >>= 16;
-    printf("%x\nDone with key", sectorKey);
+    printf("%x\namDone with key", sectorKey);
     fflush(stdout);
     m_authInfo->key = sectorKey;
 
