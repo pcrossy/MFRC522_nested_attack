@@ -380,13 +380,13 @@ bool RC522::readBlock( byte blockAddr, byte *data, byte len )
 	return false;
     }
 
-//    if( currentlyAuthenticated != blockAddr/4 )// if block is not in currently open sector
-	  //  {
-	if( !authenticateOnChip( AUTHENT_A, blockAddr) )// authenticate it
+    if( currentlyAuthenticated != blockAddr/4 )// if block is not in currently open sector
 	{
-	    return false;
-	}
-	//}
+	   if( !authenticateOnChip( AUTHENT_A, blockAddr) )// authenticate it
+	   {
+	   return false;
+	   }
+    }
 
     data[0] = MF_READ;
     data[1] = blockAddr;
