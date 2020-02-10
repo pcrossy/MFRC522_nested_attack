@@ -368,7 +368,8 @@ bool RC522::readBlock( byte blockAddr, byte *data, byte len )
     std::cout << "readBlock\n";
 #endif
 
-    if( len < 18 )
+    // if( len < 18 )
+    if( len < 16 )
     {
 	std::cerr << "Could not read: No storage\n";
 	return false;
@@ -664,7 +665,7 @@ bool RC522::piccIO( byte command, byte nrOfBytesToSend, byte *data, byte len, by
 	writeRegister( BIT_FRAMING_REG, &m_val );
     }
 
-    int watchDog = 6000;
+    int watchDog = 3000;
     byte status;
     while(1)// wait for completion
     {
