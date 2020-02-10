@@ -317,11 +317,11 @@ bool RC522::authenticateOnChip( byte command, byte blockAddr, byte *key /*=nullp
 	for( int i = 0; i<6; i++ )
 	{
 	    pack[i+2] = key[i];
-        printf("%x", key)
+        printf("%x", key);
         fflush(stdout);
 	}
     }// else key==nullptr
-    printf("\n Done with key")
+    printf("\n Done with key");
     fflush(stdout);
     for( int i = 0; i<4; i++ )
     {
