@@ -114,7 +114,7 @@ bool MFrec::automatedCrackKey( byte command, byte blockAddr_e, byte blockAddr_a,
 	          continue;
 	       }else{
             key = defaultKeys[ikey];
-            printf("Auth Successful Block: %d, key: %x\n",blockAddr_e, *defaultKeys[ikey]);
+            printf("Auth Successful Block: %d, key: %x key p set to: %x\n",blockAddr_e, *defaultKeys[ikey], *key);
             fflush(stdout);
             break;
         }

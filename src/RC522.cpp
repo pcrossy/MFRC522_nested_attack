@@ -384,7 +384,9 @@ bool RC522::readBlock( byte blockAddr, byte *data, byte len )
 	{
 	   if( !authenticateOnChip( AUTHENT_A, blockAddr) )// authenticate it
 	   {
-	   return false;
+        fprintf("Authenticating on chip");
+        fflush(stdout);
+	    return false;
 	   }
     }
 
