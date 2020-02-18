@@ -361,7 +361,7 @@ DESCRIPTION: reads a block from the TAG, note: this will authenticate also if no
 RETURN:
 
 ==============================================================================================================*/
-
+// Len must be 0x90 eventually
 bool RC522::readBlock( byte blockAddr, byte *data, byte len )
 {
 #if RC522_DBG
@@ -395,7 +395,7 @@ bool RC522::readBlock( byte blockAddr, byte *data, byte len )
     data[1] = blockAddr;
 
     calcCRC( data, 2, &data[2] );
-    printf("CRC:%x%x%x%x piccIO, %x  %x\n",data[2],data[3],data[4],data[5],data[0],data[1]);
+    printf("CRC:%x %x %x %x piccIO, %x  %x\n",data[2],data[3],data[4],data[5],data[0],data[1]);
 
     fflush(stdout);
     return piccIO( TRANSCEIVE, 4, data, len );
@@ -685,9 +685,11 @@ bool RC522::piccIO( byte command, byte nrOfBytesToSend, byte *data, byte len, by
     }// while
 
     // check for errors of the last command
+    printf("status 1. : %x", status);
     readRegister( ERROR_REG, &status );
     if( status & 0x11 )// FIFO overflow or protocol error
     {
+    printf("status fifo overflow or protocol : %x", status);
 	std::cerr << "Error occured\n";
 	return false;
     }
@@ -696,7 +698,7 @@ bool RC522::piccIO( byte command, byte nrOfBytesToSend, byte *data, byte len, by
     if( command == TRANSCEIVE || command == RECEIVE )
     {
 	readRegister( FIFO_LVL_REG, &status );// bytes in current FIFO
-
+    printf("status fifo overflow or protocol : %x", status);
 	if( status > len )
 	{
 	    std::cerr << "Not enough room in buffer\n";
